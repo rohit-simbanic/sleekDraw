@@ -675,81 +675,352 @@ input[type="range"]::-webkit-slider-thumb:hover {
   border-radius: 50%;
 }
 
-/* Mobile responsive media queries */
-@media (max-width: 768px) {
+/* ================================================
+   MOBILE RESPONSIVE — Full overhaul
+   ================================================ */
+
+/* ---------- Small phones (≤480px) ---------- */
+@media (max-width: 480px) {
+
+  /* --- Toolbar: slim pill at the very bottom with safe-area inset --- */
   .toolbar {
+    position: fixed;
     top: auto;
-    bottom: 16px;
-    width: 92%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    transform: none;
+    border-radius: 20px 20px 0 0;
+    padding: 10px 6px calc(10px + env(safe-area-inset-bottom));
+    gap: 2px;
     justify-content: space-around;
-    padding: 4px;
-    left: 50%;
-    transform: translateX(-50%);
+    flex-wrap: wrap;
+    z-index: 200;
+    box-sizing: border-box;
   }
 
   .tool-btn {
-    width: 38px;
-    height: 38px;
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    font-size: 0; /* hide text that leaks */
   }
 
+  /* Suppress tooltips on touch (no hover) */
+  .tool-tooltip {
+    display: none;
+  }
+
+  /* --- Left sidebar: full-width bottom sheet --- */
   .sidebar-panel {
-    left: 10px;
-    width: calc(100% - 20px);
-    max-height: calc(100vh - 120px);
+    position: fixed;
+    top: auto !important;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100% !important;
+    max-height: 70vh;
+    border-radius: 20px 20px 0 0;
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
     overflow-y: auto;
-    top: 10px;
+    z-index: 300;
+    box-sizing: border-box;
   }
 
   .sidebar-panel.collapsed {
-    transform: translateY(-120%);
+    transform: translateY(110%) !important;
     opacity: 0;
+    pointer-events: none;
   }
 
   .sidebar-panel.open {
-    transform: translateY(0);
+    transform: translateY(0) !important;
     opacity: 1;
   }
 
+  /* --- Right sidebar: full-width bottom sheet (slides up from bottom) --- */
   .right-panel {
-    right: 10px;
-    width: calc(100% - 20px);
-    max-height: calc(100vh - 120px);
-    top: 10px;
+    position: fixed;
+    top: auto !important;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100% !important;
+    max-height: 75vh;
+    border-radius: 20px 20px 0 0;
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    z-index: 300;
+    box-sizing: border-box;
   }
 
   .right-panel.collapsed {
-    transform: translateY(-120%);
+    transform: translateY(110%) !important;
     opacity: 0;
+    pointer-events: none;
   }
 
   .right-panel.open {
-    transform: translateY(0);
+    transform: translateY(0) !important;
     opacity: 1;
   }
 
-  .zoom-controls {
-    bottom: 80px;
-    right: 10px;
-    padding: 4px 8px;
-    gap: 4px;
+  /* Drag handle pill above sheet */
+  .sidebar-panel::before,
+  .right-panel::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+    margin: 0 auto 12px;
   }
 
+  /* --- Floating toggle buttons: corners above toolbar --- */
+  .sidebar-toggle-btn {
+    position: fixed !important;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    top: auto !important;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    z-index: 199;
+  }
+
+  /* Left toggle stays left */
+  .sidebar-toggle-btn[style*="left"] {
+    left: 12px !important;
+  }
+
+  /* Right toggle stays right */
+  .sidebar-toggle-btn[style*="right"] {
+    right: 12px !important;
+  }
+
+  /* --- Action controls: above toolbar on the left --- */
   .action-controls {
-    bottom: 80px;
-    left: 10px;
+    position: fixed;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    left: 12px;
+    top: auto;
     padding: 4px;
-    gap: 3px;
+    gap: 4px;
+    z-index: 198;
+  }
+
+  /* --- Zoom controls: above toolbar on the right --- */
+  .zoom-controls {
+    position: fixed;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    right: 12px;
+    left: auto;
+    top: auto;
+    padding: 4px 8px;
+    gap: 4px;
+    z-index: 198;
   }
 
   .zoom-controls .tool-btn,
   .action-controls .tool-btn {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .zoom-value {
+    font-size: 10px;
+    width: 28px;
+  }
+
+  /* --- Modals: full-screen sheet on phones --- */
+  .modal-content {
+    width: calc(100vw - 24px);
+    max-width: 400px;
+    padding: 20px 16px;
+    box-sizing: border-box;
+  }
+
+  .link-input-container {
+    flex-direction: column;
+  }
+
+  /* --- Spacebar hint: top-center, small --- */
+  .spacebar-hint {
+    top: 12px;
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  /* --- Library grid: single column on tiny screens --- */
+  .lib-shapes-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  /* --- Canvas overlay backdrop for open sheets --- */
+  .sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
+    z-index: 290;
+    pointer-events: auto;
+  }
+}
+
+/* ---------- Tablets / large phones (481px – 768px) ---------- */
+@media (min-width: 481px) and (max-width: 768px) {
+
+  /* Toolbar: floating pill at bottom, scrollable row */
+  .toolbar {
+    position: fixed;
+    top: auto;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    max-width: calc(100vw - 32px);
+    padding: 6px 8px;
+    gap: 4px;
+    border-radius: 18px;
+    z-index: 200;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .tool-btn {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+  }
+
+  /* Tooltips: hidden (touch device) */
+  .tool-tooltip {
+    display: none;
+  }
+
+  /* --- Left sidebar: slide-in from left, partial width --- */
+  .sidebar-panel {
+    position: fixed;
+    top: 0 !important;
+    bottom: 0;
+    left: 0;
+    width: 280px !important;
+    max-height: 100vh;
+    border-radius: 0 20px 20px 0;
+    padding: 20px 16px 32px;
+    overflow-y: auto;
+    z-index: 300;
+    box-sizing: border-box;
+  }
+
+  .sidebar-panel.collapsed {
+    transform: translateX(-100%) !important;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .sidebar-panel.open {
+    transform: translateX(0) !important;
+    opacity: 1;
+  }
+
+  /* --- Right sidebar: slide-in from right, partial width --- */
+  .right-panel {
+    position: fixed;
+    top: 0 !important;
+    bottom: 0;
+    right: 0;
+    left: auto;
+    width: 290px !important;
+    max-height: 100vh;
+    border-radius: 20px 0 0 20px;
+    padding: 20px 16px 32px;
+    overflow-y: auto;
+    z-index: 300;
+    box-sizing: border-box;
+  }
+
+  .right-panel.collapsed {
+    transform: translateX(100%) !important;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .right-panel.open {
+    transform: translateX(0) !important;
+    opacity: 1;
+  }
+
+  /* --- Toggle buttons: left/right edges, vertically centered --- */
+  .sidebar-toggle-btn {
+    position: fixed !important;
+    top: 50% !important;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 0 12px 12px 0;
+    z-index: 199;
+  }
+
+  .sidebar-toggle-btn[style*="left"] {
+    left: 0 !important;
+    border-radius: 0 12px 12px 0;
+  }
+
+  .sidebar-toggle-btn[style*="right"] {
+    right: 0 !important;
+    border-radius: 12px 0 0 12px;
+  }
+
+  /* --- Action controls: bottom-left above toolbar --- */
+  .action-controls {
+    position: fixed;
+    bottom: calc(80px + env(safe-area-inset-bottom));
+    left: 12px;
+    top: auto;
+    padding: 4px;
+    gap: 4px;
+    z-index: 198;
+  }
+
+  /* --- Zoom controls: bottom-right above toolbar --- */
+  .zoom-controls {
+    position: fixed;
+    bottom: calc(80px + env(safe-area-inset-bottom));
+    right: 12px;
+    left: auto;
+    top: auto;
+    padding: 4px 8px;
+    gap: 4px;
+    z-index: 198;
+  }
+
+  .zoom-controls .tool-btn,
+  .action-controls .tool-btn {
+    width: 34px;
+    height: 34px;
   }
 
   .zoom-value {
     font-size: 11px;
     width: 30px;
+  }
+
+  /* --- Modals --- */
+  .modal-content {
+    width: calc(100vw - 40px);
+    max-width: 420px;
+    padding: 22px 18px;
+    box-sizing: border-box;
+  }
+
+  /* --- Spacebar hint --- */
+  .spacebar-hint {
+    top: 14px;
+    font-size: 11px;
+    padding: 4px 10px;
   }
 }
 
@@ -846,12 +1117,4 @@ input[type="range"]::-webkit-slider-thumb:hover {
   align-items: center;
   gap: 6px;
   white-space: nowrap;
-}
-
-@media (max-width: 768px) {
-  .spacebar-hint {
-    top: 20px;
-    font-size: 11px;
-    padding: 4px 10px;
-  }
 }

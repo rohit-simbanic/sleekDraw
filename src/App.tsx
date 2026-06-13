@@ -84,7 +84,8 @@ export default function App() {
   const [isShapesLoading, setIsShapesLoading] = useState(false);
 
   // Collapsible Sidebars Responsive States
-  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(window.innerWidth > 768);
+  const isMobile = window.innerWidth <= 768;
+  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(!isMobile);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(window.innerWidth > 1024);
 
   // 1. Initialize E2EE Sockets Collaboration Hook
@@ -727,6 +728,17 @@ export default function App() {
         onChange={setTextValue}
         onBlur={finishTextEditing}
       />
+
+      {/* Mobile backdrop — closes whichever sheet is open */}
+      {(isLeftSidebarOpen || isRightSidebarOpen) && window.innerWidth <= 768 && (
+        <div
+          className="sheet-backdrop"
+          onClick={() => {
+            setIsLeftSidebarOpen(false);
+            setIsRightSidebarOpen(false);
+          }}
+        />
+      )}
 
       {/* Left Sidebar Canvas Styling Options */}
       <CanvasStylingSidebar
