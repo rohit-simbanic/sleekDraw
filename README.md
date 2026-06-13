@@ -1,6 +1,9 @@
 <div align="center">
   <h1>🎨 SleekDraw</h1>
   <p><strong>A virtual hand-drawn style collaborative whiteboard. E2EE and responsive.</strong></p>
+  <p>
+    <a href="https://sleek-draw.vercel.app"><strong>🌐 Try Live App</strong></a>
+  </p>
 </div>
 
 <h4 align="center">
@@ -100,7 +103,20 @@ docker compose up -d --build
 
 ---
 
-## 🚀 CI/CD & Deployments
+## 🚀 Production Deployment
 
-- **Frontend:** Automatically deployed to **Vercel** via `.github/workflows/vercel-deploy.yml` upon pushes to the `main` branch.
-- **Backend:** Hosted on your VPS, running as a Dockerized node server.
+### 🌐 Live URLs
+- **Frontend App:** [https://sleek-draw.vercel.app](https://sleek-draw.vercel.app)
+- **Backend API (Relay Server):** [https://sleekdraw.duckdns.org](https://sleekdraw.duckdns.org)
+
+### 🖥️ VPS Infrastructure (Backend)
+The backend is hosted on your DigitalOcean VPS (`139.59.69.207`) configured as follows:
+- **Application:** Dockerized Node.js relay server running on port `4000`.
+- **Process Management:** Runs inside Docker Compose with automatic restarts.
+- **Subdomain:** Routed through `sleekdraw.duckdns.org` using Duck DNS.
+- **Reverse Proxy:** Nginx configured with WebSocket support (`proxy_set_header Upgrade $http_upgrade;`).
+- **SSL Certificate:** Secured with Let's Encrypt TLS/SSL using Certbot (auto-renewing).
+
+### ⚡ Frontend Deployment
+- Automatically deployed to **Vercel** via `.github/workflows/vercel-deploy.yml` upon pushes to the `main` branch.
+- Configured with the `VITE_BACKEND_URL` environment variable pointing to `https://sleekdraw.duckdns.org`.
