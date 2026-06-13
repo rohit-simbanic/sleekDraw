@@ -23,15 +23,8 @@
 </p>
 
 <div align="center">
-  <figure>
-    <img src="./src/assets/showcase.png" alt="SleekDraw Showcase Preview" width="800" style="border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 30px rgba(0,0,0,0.3);" />
-    
-    <figcaption>
-      <p align="center">
-        Create beautiful hand-drawn styled mockups, arrows, rectangles, freehand drawings, and diagrams.
-      </p>
-    </figcaption>
-  </figure>
+  <img src="./src/assets/showcase.png" alt="SleekDraw Showcase Preview" width="800" />
+  <p><em>Create beautiful hand-drawn styled mockups, arrows, rectangles, freehand drawings, and diagrams.</em></p>
 </div>
 
 ---
