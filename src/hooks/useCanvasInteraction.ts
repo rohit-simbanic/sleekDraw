@@ -56,6 +56,11 @@ export const useCanvasInteraction = ({
   const activeElementIdRef = useRef<string | null>(null);
   const originalElementsRef = useRef<CanvasElement[]>([]);
 
+  // Touch tracking refs (pinch-to-zoom + single-finger pan)
+  const lastTouchRef = useRef<{ x: number; y: number } | null>(null);
+  const lastPinchDistRef = useRef<number | null>(null);
+  const lastPinchMidRef = useRef<{ x: number; y: number } | null>(null);
+
   // Convert client cursor coords to Canvas World coordinates
   const screenToWorld = (clientX: number, clientY: number): Point => {
     return {
@@ -480,6 +485,224 @@ export const useCanvasInteraction = ({
     activeElementIdRef.current = null;
   };
 
+  // ─── Touch Handlers ───────────────────────────────────────────────────────
+
+  const getTouchDist = (t1: React.Touch, t2: React.Touch): number => {
+    const dx = t1.clientX - t2.clientX;
+    const dy = t1.clientY - t2.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const getTouchMid = (t1: React.Touch, t2: React.Touch) => ({
+    x: (t1.clientX + t2.clientX) / 2,
+    y: (t1.clientY + t2.clientY) / 2
+  });
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    // Always prevent default to stop browser scroll/zoom
+    e.preventDefault();
+
+    if (e.touches.length === 1) {
+      // Single finger — start pan or drawing
+      const t = e.touches[0];
+      lastTouchRef.current = { x: t.clientX, y: t.clientY };
+      lastPinchDistRef.current = null;
+      lastPinchMidRef.current = null;
+
+      // Synthesise a mouse-down so drawing/selection still works
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const clientX = t.clientX - rect.left;
+      const clientY = t.clientY - rect.top;
+      const worldPoint = screenToWorld(clientX, clientY);
+
+      if (appState.activeTool === 'selection') {
+        const hitElement = getElementAtPosition(worldPoint.x, worldPoint.y, elements);
+        if (hitElement) {
+          setAction('moving');
+          dragStart.current = worldPoint;
+          originalElementsRef.current = JSON.parse(JSON.stringify(elements));
+          setAppState(prev => ({ ...prev, selectedElementIds: { [hitElement.id]: true } }));
+        } else {
+          // Single-finger on empty space = pan
+          setAction('panning');
+          dragStart.current = { x: t.clientX, y: t.clientY };
+          initialPan.current = { x: appState.pan.x, y: appState.pan.y };
+        }
+      } else if (appState.activeTool !== 'text') {
+        // Drawing tools — start a new element
+        const newId = Math.random().toString(36).substring(2, 9);
+        const newEl: CanvasElement = {
+          id: newId,
+          type: appState.activeTool,
+          x: worldPoint.x,
+          y: worldPoint.y,
+          width: 0,
+          height: 0,
+          strokeColor: appState.strokeColor,
+          fillColor: appState.fillColor,
+          fillStyle: appState.fillStyle,
+          strokeWidth: appState.strokeWidth,
+          strokeStyle: appState.strokeStyle,
+          opacity: appState.opacity,
+          version: 1,
+          updatedAt: Date.now()
+        };
+        if (appState.activeTool === 'pencil') newEl.points = [{ x: 0, y: 0 }];
+        else if (appState.activeTool === 'line' || appState.activeTool === 'arrow')
+          newEl.points = [{ x: 0, y: 0 }, { x: 0, y: 0 }];
+
+        setAction('drawing');
+        activeElementIdRef.current = newId;
+        updateElementsList(prev => [...prev, newEl]);
+      }
+    } else if (e.touches.length === 2) {
+      // Two fingers — start pinch
+      setAction('none');
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      lastPinchDistRef.current = getTouchDist(t1, t2);
+      lastPinchMidRef.current = getTouchMid(t1, t2);
+      lastTouchRef.current = null;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault();
+
+    if (e.touches.length === 1 && lastTouchRef.current) {
+      const t = e.touches[0];
+
+      if (action === 'panning') {
+        // Pan the canvas
+        const deltaX = t.clientX - dragStart.current.x;
+        const deltaY = t.clientY - dragStart.current.y;
+        setAppState(prev => ({
+          ...prev,
+          pan: {
+            x: initialPan.current.x + deltaX,
+            y: initialPan.current.y + deltaY
+          }
+        }));
+      } else if (action === 'moving') {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const worldPoint = screenToWorld(t.clientX - rect.left, t.clientY - rect.top);
+        const deltaX = worldPoint.x - dragStart.current.x;
+        const deltaY = worldPoint.y - dragStart.current.y;
+        updateElementsList(prev =>
+          prev.map(el => {
+            if (!appState.selectedElementIds[el.id]) return el;
+            const original = originalElementsRef.current.find(o => o.id === el.id);
+            if (!original) return el;
+            return { ...el, x: original.x + deltaX, y: original.y + deltaY, bounds: undefined };
+          })
+        );
+      } else if (action === 'drawing' && activeElementIdRef.current) {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const worldPoint = screenToWorld(t.clientX - rect.left, t.clientY - rect.top);
+        updateElementsList(prev =>
+          prev.map(el => {
+            if (el.id !== activeElementIdRef.current) return el;
+            if (el.type === 'pencil') {
+              return {
+                ...el,
+                points: [...(el.points || []), { x: worldPoint.x - el.x, y: worldPoint.y - el.y }],
+                bounds: undefined
+              };
+            }
+            if (el.type === 'line' || el.type === 'arrow') {
+              return {
+                ...el,
+                points: [el.points![0], { x: worldPoint.x - el.x, y: worldPoint.y - el.y }],
+                width: worldPoint.x - el.x,
+                height: worldPoint.y - el.y,
+                bounds: undefined
+              };
+            }
+            return { ...el, width: worldPoint.x - el.x, height: worldPoint.y - el.y, bounds: undefined };
+          })
+        );
+      }
+
+      lastTouchRef.current = { x: t.clientX, y: t.clientY };
+    } else if (e.touches.length === 2 && lastPinchDistRef.current !== null && lastPinchMidRef.current !== null) {
+      // Pinch-to-zoom with focal point
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const newDist = getTouchDist(t1, t2);
+      const newMid = getTouchMid(t1, t2);
+
+      const scale = newDist / lastPinchDistRef.current;
+
+      setAppState(prev => {
+        const newZoom = Math.min(10, Math.max(0.05, prev.zoom * scale));
+        // Keep the pinch midpoint fixed in world space
+        const worldX = (newMid.x - prev.pan.x) / prev.zoom;
+        const worldY = (newMid.y - prev.pan.y) / prev.zoom;
+        return {
+          ...prev,
+          zoom: newZoom,
+          pan: {
+            x: newMid.x - worldX * newZoom,
+            y: newMid.y - worldY * newZoom
+          }
+        };
+      });
+
+      // Also pan if midpoint moved
+      const midDeltaX = newMid.x - lastPinchMidRef.current.x;
+      const midDeltaY = newMid.y - lastPinchMidRef.current.y;
+      if (Math.abs(midDeltaX) > 0.5 || Math.abs(midDeltaY) > 0.5) {
+        setAppState(prev => ({
+          ...prev,
+          pan: { x: prev.pan.x + midDeltaX, y: prev.pan.y + midDeltaY }
+        }));
+      }
+
+      lastPinchDistRef.current = newDist;
+      lastPinchMidRef.current = newMid;
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    e.preventDefault();
+    if (e.touches.length === 0) {
+      // Finalize drawing same as mouse up
+      if (action === 'drawing' && activeElementIdRef.current) {
+        setElements(prev => {
+          const updated = prev.map(el =>
+            el.id === activeElementIdRef.current ? finalizeElement(el) : el
+          );
+          saveToHistory(updated);
+          broadcastState(updated);
+          return updated;
+        });
+      } else {
+        saveToHistory(elements);
+        broadcastState(elements);
+      }
+      setAction('none');
+      setSelectionBox(null);
+      activeElementIdRef.current = null;
+      lastTouchRef.current = null;
+      lastPinchDistRef.current = null;
+      lastPinchMidRef.current = null;
+    } else if (e.touches.length === 1) {
+      // Went from 2 fingers to 1 — resume single-touch tracking
+      const t = e.touches[0];
+      lastTouchRef.current = { x: t.clientX, y: t.clientY };
+      lastPinchDistRef.current = null;
+      lastPinchMidRef.current = null;
+    }
+  };
+
+  // ─── End Touch Handlers ────────────────────────────────────────────────────
+
   // Commit text editing
   const finishTextEditing = useCallback(() => {
     if (!editingTextElement) return;
@@ -638,6 +861,9 @@ export const useCanvasInteraction = ({
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
     finishTextEditing,
     deleteSelectedElements,
     clearCanvas

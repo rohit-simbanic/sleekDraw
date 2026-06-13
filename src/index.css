@@ -1118,3 +1118,45 @@ input[type="range"]::-webkit-slider-thumb:hover {
   gap: 6px;
   white-space: nowrap;
 }
+
+/* ================================================
+   UTILITY — show/hide by device
+   ================================================ */
+.desktop-only {
+  display: flex; /* shown on desktop by default */
+}
+
+/* Mobile hint replaces the spacebar hint on touch devices */
+.mobile-touch-hint {
+  display: none; /* hidden on desktop */
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 15, 20, 0.85);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 5px 12px;
+  border-radius: 9999px;
+  color: #e5e7eb;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  z-index: 5;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  gap: 6px;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+
+  .mobile-touch-hint {
+    display: flex;
+  }
+}

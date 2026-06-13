@@ -155,6 +155,9 @@ export default function App() {
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
     finishTextEditing,
     deleteSelectedElements,
     clearCanvas
@@ -703,6 +706,9 @@ export default function App() {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         style={{
           display: 'block',
           position: 'absolute',
@@ -715,7 +721,8 @@ export default function App() {
             ? 'grabbing'
             : appState.activeTool === 'selection'
             ? 'default'
-            : 'crosshair'
+            : 'crosshair',
+          touchAction: 'none'  /* tell browser we handle all touch ourselves */
         }}
       />
 
@@ -770,6 +777,11 @@ export default function App() {
 
       {/* Floating Canvas Hints Overlay */}
       <SpacebarHint />
+
+      {/* Mobile touch hint — only visible on touch devices */}
+      <div className="mobile-touch-hint">
+        <span>1 finger: draw/pan · 2 fingers: pinch-zoom</span>
+      </div>
 
       {/* Tabbed Right Panel (Collaboration & Catalog Browser) */}
       <RightSidebar
