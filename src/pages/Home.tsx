@@ -14,7 +14,7 @@ interface HomeProps {
 type HeaderStyleType = 'corner' | 'split-flap';
 
 export default function Home({ onStartDrawing }: HomeProps) {
-  const [headerStyle, setHeaderStyle] = useState<HeaderStyleType>('split-flap');
+  const [headerStyle, setHeaderStyle] = useState<HeaderStyleType>('corner');
 
   return (
     <div className="landing-body">
