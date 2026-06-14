@@ -219,7 +219,7 @@ export default function Header({ style, onStartDrawing }: HeaderProps) {
           {style === 'split-flap' && (
             <button
               onClick={() => setIsOverlayOpen(true)}
-              className="l-btn-primary"
+              className="l-btn-primary l-btn-split-flap-trigger"
               style={{ padding: '8px 18px', fontSize: '13px' }}
             >
               <span className="l-btn-primary-content">

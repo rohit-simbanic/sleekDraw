@@ -1211,6 +1211,10 @@
     display: block !important;
   }
 
+  .l-navbar .l-btn-split-flap-trigger {
+    display: inline-flex !important;
+  }
+
   .hero-title {
     font-size: 44px;
   }
@@ -1604,7 +1608,7 @@
 }
 
 /* --- Mobile Responsive Overrides for Interactive Headers --- */
-@media (max-width: 767px) {
+@media (max-width: 768px) {
   /* Hide the header style switcher panel completely in mobile view */
   .l-switcher-container {
     display: none !important;
