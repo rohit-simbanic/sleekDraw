@@ -21,11 +21,39 @@ import { getElementsArray } from './components/LibraryShapePreview';
 import { useHistory } from './hooks/useHistory';
 import { useCollaboration } from './hooks/useCollaboration';
 import { useCanvasInteraction } from './hooks/useCanvasInteraction';
+import Home from './pages/Home';
 
 const myColor = PEER_COLORS[Math.floor(Math.random() * PEER_COLORS.length)];
 
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // Simple Hash Router state
+  const [currentView, setCurrentView] = useState<'landing' | 'canvas'>(() => {
+    const hash = window.location.hash;
+    if (hash.includes('room=') || hash.includes('draw')) {
+      return 'canvas';
+    }
+    return 'landing';
+  });
+
+  const handleStartDrawing = useCallback(() => {
+    window.location.hash = 'draw';
+    setCurrentView('canvas');
+  }, []);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash.includes('room=') || hash.includes('draw')) {
+        setCurrentView('canvas');
+      } else {
+        setCurrentView('landing');
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   // Core Drawing States
   const [elements, setElements] = useState<CanvasElement[]>([]);
@@ -685,6 +713,10 @@ export default function App() {
   useEffect(() => {
     triggerRedraw();
   }, [elements, appState, peerCursors, selectionBox]);
+
+  if (currentView === 'landing') {
+    return <Home onStartDrawing={handleStartDrawing} />;
+  }
 
   return (
     <div className="canvas-container" style={{ backgroundColor: appState.canvasBackgroundColor }}>
