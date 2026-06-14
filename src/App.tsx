@@ -22,6 +22,7 @@ import { useHistory } from './hooks/useHistory';
 import { useCollaboration } from './hooks/useCollaboration';
 import { useCanvasInteraction } from './hooks/useCanvasInteraction';
 import Home from './pages/Home';
+import NotFound from './pages/NotFound';
 
 const myColor = PEER_COLORS[Math.floor(Math.random() * PEER_COLORS.length)];
 
@@ -29,12 +30,15 @@ export default function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // Simple Hash Router state
-  const [currentView, setCurrentView] = useState<'landing' | 'canvas'>(() => {
+  const [currentView, setCurrentView] = useState<'landing' | 'canvas' | '404'>(() => {
     const hash = window.location.hash;
-    if (hash.includes('room=') || hash.includes('draw')) {
+    if (!hash || hash === '#' || hash === '#/') {
+      return 'landing';
+    }
+    if (hash === '#draw' || hash.match(/#room=([a-zA-Z0-9_-]+)&key=([a-fA-F0-9]{32})/)) {
       return 'canvas';
     }
-    return 'landing';
+    return '404';
   });
 
   const handleStartDrawing = useCallback(() => {
@@ -45,10 +49,12 @@ export default function App() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
-      if (hash.includes('room=') || hash.includes('draw')) {
+      if (!hash || hash === '#' || hash === '#/') {
+        setCurrentView('landing');
+      } else if (hash === '#draw' || hash.match(/#room=([a-zA-Z0-9_-]+)&key=([a-fA-F0-9]{32})/)) {
         setCurrentView('canvas');
       } else {
-        setCurrentView('landing');
+        setCurrentView('404');
       }
     };
     window.addEventListener('hashchange', handleHashChange);
@@ -57,7 +63,7 @@ export default function App() {
 
   // Manage body overflow dynamically based on active view
   useEffect(() => {
-    if (currentView === 'landing') {
+    if (currentView === 'landing' || currentView === '404') {
       document.body.style.overflow = 'auto';
     } else {
       document.body.style.overflow = 'hidden';
@@ -722,6 +728,10 @@ export default function App() {
   useEffect(() => {
     triggerRedraw();
   }, [elements, appState, peerCursors, selectionBox]);
+
+  if (currentView === '404') {
+    return <NotFound />;
+  }
 
   if (currentView === 'landing') {
     return <Home onStartDrawing={handleStartDrawing} />;
