@@ -1340,3 +1340,265 @@
 .will-change-transform {
   will-change: transform;
 }
+
+/* --- Interactive Header Styles --- */
+
+/* 1. Switcher Widget */
+.l-switcher-container {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 999;
+  background: rgba(18, 18, 20, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 260px;
+  will-change: transform;
+  font-family: var(--font-sans);
+}
+.l-switcher-title {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-slate);
+  padding-left: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.l-switcher-title-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--emerald);
+  box-shadow: 0 0 8px var(--emerald);
+  animation: pulse-active 1.5s infinite;
+}
+@keyframes pulse-active {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+.l-switcher-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+.l-switcher-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-slate);
+  padding: 8px 6px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
+  user-select: none;
+}
+.l-switcher-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-white);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.l-switcher-btn.active {
+  background: linear-gradient(135deg, var(--indigo) 0%, var(--purple) 100%);
+  border-color: transparent;
+  color: var(--text-white);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+}
+
+/* 2. SVG Laser Border */
+.l-laser-svg {
+  position: absolute;
+  inset: -1px;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  pointer-events: none;
+  border-radius: 9999px;
+  overflow: visible;
+  z-index: 5;
+}
+.l-laser-path {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.04);
+  stroke-width: 1.5;
+}
+.l-laser-glow {
+  fill: none;
+  stroke: var(--indigo);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px var(--indigo)) drop-shadow(0 0 8px var(--purple));
+}
+
+/* 3. Corner Dock Layout Widgets */
+.l-corner-widget {
+  position: fixed;
+  z-index: 200;
+  background: rgba(18, 18, 20, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  padding: 10px 18px;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+}
+.l-corner-widget:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(18, 18, 20, 0.9);
+}
+.l-corner-logo {
+  top: 24px;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border-radius: 9999px;
+}
+.l-corner-logo .l-logo-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+.l-corner-logo .l-brand-name {
+  font-size: 16px;
+}
+.l-corner-nav {
+  bottom: 24px;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border-radius: 9999px;
+}
+.l-corner-nav .l-nav-link {
+  padding: 4px 6px;
+  font-size: 13px;
+}
+.l-corner-github {
+  top: 24px;
+  right: 24px;
+  border-radius: 50%;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  box-sizing: border-box;
+}
+.l-corner-cta {
+  bottom: 24px;
+  right: 24px;
+  border-radius: 9999px;
+  padding: 0;
+  overflow: hidden;
+  border: none;
+}
+.l-corner-cta .l-btn-primary {
+  box-shadow: none;
+  border-radius: 0;
+  padding: 12px 28px;
+  font-size: 13px;
+}
+
+/* 4. Split-Flap Full-Screen Overlay */
+.l-overlay-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  background: rgba(8, 8, 10, 0.95);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.l-overlay-menu.open {
+  opacity: 1;
+  visibility: visible;
+}
+.l-overlay-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+  width: 100%;
+  max-width: 600px;
+}
+.l-overlay-link-btn {
+  background: transparent;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-slate);
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.l-overlay-link-btn:hover {
+  color: var(--text-white);
+  transform: scale(1.08);
+}
+.l-overlay-close-btn {
+  position: absolute;
+  top: 28px;
+  right: 28px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-slate);
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, color 0.2s, transform 0.2s;
+}
+.l-overlay-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-white);
+  transform: rotate(90deg);
+}
+.l-overlay-scramble-text {
+  font-family: monospace;
+  letter-spacing: 0.02em;
+}
+.l-overlay-scramble-text-hovered {
+  background: linear-gradient(to right, #818cf8, #f472b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.l-overlay-action-container {
+  margin-top: 48px;
+  display: flex;
+  gap: 24px;
+}
+.l-overlay-action-container .l-btn-primary {
+  padding: 14px 32px;
+  font-size: 15px;
+}
