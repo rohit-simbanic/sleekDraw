@@ -55,6 +55,15 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  // Manage body overflow dynamically based on active view
+  useEffect(() => {
+    if (currentView === 'landing') {
+      document.body.style.overflow = 'auto';
+    } else {
+      document.body.style.overflow = 'hidden';
+    }
+  }, [currentView]);
+
   // Core Drawing States
   const [elements, setElements] = useState<CanvasElement[]>([]);
   const [appState, setAppState] = useState<AppState>({
