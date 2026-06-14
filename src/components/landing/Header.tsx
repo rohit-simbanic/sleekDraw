@@ -64,13 +64,6 @@ export default function Header({ style, onStartDrawing }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
-  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
-
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const handleScrollTo = (id: string) => {
     setIsOpen(false);
@@ -297,8 +290,8 @@ export default function Header({ style, onStartDrawing }: HeaderProps) {
         )}
       </header>
 
-      {/* --- Corner Docks Mode Widgets --- */}
-      {(style === 'corner' || windowWidth < 768) && (
+      {/* --- Corner Docks Mode Widgets (Hidden in mobile view via media-query) --- */}
+      {style === 'corner' && (
         <>
           {/* Top-Left Logo Box */}
           <div className="l-corner-widget l-corner-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
