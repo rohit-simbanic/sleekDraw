@@ -1273,3 +1273,70 @@
     font-size: 16px;
   }
 }
+
+/* --- Innovative Flashlight Glow Overlay for Bento Cards --- */
+.bento-card .glow-overlay {
+  position: absolute;
+  inset: -1px;
+  border-radius: 24px;
+  background: radial-gradient(
+    300px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
+    rgba(99, 102, 241, 0.15),
+    transparent 80%
+  );
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  will-change: background;
+}
+
+.bento-card:hover .glow-overlay {
+  opacity: 1;
+}
+
+/* Ensure children card content sits above glow-overlay */
+.bento-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+.bento-card .bento-bg-grid-pattern,
+.bento-card .bento-bg-graphic {
+  z-index: 1;
+}
+
+/* --- Floating Parallax Background Shapes (Hero) --- */
+.floating-shape-container {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.25;
+  will-change: transform;
+}
+
+.floating-shape-1 {
+  top: 15%;
+  left: 10%;
+  color: var(--indigo);
+  filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.2));
+}
+
+.floating-shape-2 {
+  top: 25%;
+  right: 12%;
+  color: var(--pink);
+  filter: drop-shadow(0 0 20px rgba(236, 72, 153, 0.2));
+}
+
+.floating-shape-3 {
+  bottom: 20%;
+  left: 15%;
+  color: var(--purple);
+  filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.2));
+}
+
+/* Performance Helper */
+.will-change-transform {
+  will-change: transform;
+}

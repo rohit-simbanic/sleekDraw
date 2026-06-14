@@ -13,6 +13,45 @@ export default function Hero({ onStartDrawing }: HeroProps) {
   const ctaBtnRef = useRef<HTMLButtonElement>(null);
   const canvasRef = useRef<SVGSVGElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
+  const floatRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    // Subtle random floating animation (independent of cursor)
+    floatRefs.current.forEach((el) => {
+      if (!el) return;
+      gsap.to(el, {
+        y: 'random(-20, 20)',
+        x: 'random(-20, 20)',
+        rotation: 'random(-15, 15)',
+        duration: 'random(5, 8)',
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+      });
+    });
+
+    // Mouse parallax movement (GPU accelerated transforms only)
+    const handleMouseMove = (e: MouseEvent) => {
+      const { clientX, clientY } = e;
+      const xPercent = (clientX / window.innerWidth) - 0.5;
+      const yPercent = (clientY / window.innerHeight) - 0.5;
+
+      floatRefs.current.forEach((el, index) => {
+        if (!el) return;
+        const depth = (index + 1) * 35; // parallax depth factor
+        gsap.to(el, {
+          x: xPercent * depth,
+          y: yPercent * depth,
+          duration: 1.2,
+          ease: 'power2.out',
+          overwrite: 'auto',
+        });
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   // SVG paths selectors
   const box1Path1Ref = useRef<SVGPathElement>(null);
@@ -245,6 +284,32 @@ export default function Hero({ onStartDrawing }: HeroProps) {
     <section ref={containerRef} className="hero-section">
       {/* Background Decorative Grid */}
       <div className="landing-grid-bg" />
+
+      {/* Floating Parallax Shapes */}
+      <div
+        ref={(el) => { floatRefs.current[0] = el; }}
+        className="floating-shape-container floating-shape-1"
+      >
+        <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M 30,10 L 30,50 M 10,30 L 50,30 M 16,16 L 44,44 M 16,44 L 44,16" strokeLinecap="round" />
+        </svg>
+      </div>
+      <div
+        ref={(el) => { floatRefs.current[1] = el; }}
+        className="floating-shape-container floating-shape-2"
+      >
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M 40,10 C 60,10 70,25 70,40 C 70,58 55,70 40,70 C 22,70 10,55 10,40 C 10,22 25,10 40,12" strokeLinecap="round" />
+        </svg>
+      </div>
+      <div
+        ref={(el) => { floatRefs.current[2] = el; }}
+        className="floating-shape-container floating-shape-3"
+      >
+        <svg width="70" height="70" viewBox="0 0 70 70" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M 15,55 L 35,15 L 55,55 Z M 16,54 L 54,54" strokeLinecap="round" />
+        </svg>
+      </div>
 
       {/* Glow Effects */}
       <div className="glow-backdrop-1" />

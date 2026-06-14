@@ -1,9 +1,33 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Pencil, Library, Download, Move, Palette } from 'lucide-react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function BentoGrid() {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    // Staggered reveal animation for Bento cards on scroll
+    gsap.fromTo(
+      cardRefs.current,
+      { opacity: 0, y: 50, scale: 0.96 },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.7,
+        stagger: 0.12,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.bento-grid',
+          start: 'top 85%',
+          toggleActions: 'play none none none',
+        },
+      }
+    );
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, index: number) => {
     const card = cardRefs.current[index];
@@ -13,18 +37,21 @@ export default function BentoGrid() {
     const x = e.clientX - rect.left; // mouse x inside card
     const y = e.clientY - rect.top;  // mouse y inside card
 
+    // Set CSS custom properties for flashlight effect
+    card.style.setProperty('--mouse-x', `${x}px`);
+    card.style.setProperty('--mouse-y', `${y}px`);
+
     // Get offset from center (-0.5 to 0.5)
     const xc = (x / rect.width) - 0.5;
     const yc = (y / rect.height) - 0.5;
 
-    // Rotate card (max 8 degrees)
+    // Rotate card (max 7 degrees)
     gsap.to(card, {
-      rotateY: xc * 16,
-      rotateX: -yc * 16,
+      rotateY: xc * 14,
+      rotateX: -yc * 14,
       transformPerspective: 600,
       ease: 'power1.out',
       duration: 0.3,
-      shadow: '0 25px 50px -12px rgba(99, 102, 241, 0.25)',
     });
   };
 
@@ -38,7 +65,6 @@ export default function BentoGrid() {
       rotateX: 0,
       ease: 'power2.out',
       duration: 0.5,
-      shadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
     });
   };
 
@@ -71,6 +97,8 @@ export default function BentoGrid() {
             onMouseLeave={() => handleMouseLeave(0)}
             className="bento-card bento-card-2col"
           >
+            <div className="glow-overlay" />
+            
             {/* Background elements */}
             <div className="bento-bg-graphic">
               <svg>
@@ -99,6 +127,8 @@ export default function BentoGrid() {
             onMouseLeave={() => handleMouseLeave(1)}
             className="bento-card"
           >
+            <div className="glow-overlay" />
+
             <div>
               <div className="bento-icon-box icon-box-pink">
                 <Library className="w-6 h-6" />
@@ -120,6 +150,8 @@ export default function BentoGrid() {
             onMouseLeave={() => handleMouseLeave(2)}
             className="bento-card"
           >
+            <div className="glow-overlay" />
+
             <div>
               <div className="bento-icon-box icon-box-emerald">
                 <Download className="w-6 h-6" />
@@ -141,6 +173,8 @@ export default function BentoGrid() {
             onMouseLeave={() => handleMouseLeave(3)}
             className="bento-card bento-card-2col"
           >
+            <div className="glow-overlay" />
+            
             {/* Background pattern */}
             <div className="bento-bg-grid-pattern" />
 
@@ -165,6 +199,8 @@ export default function BentoGrid() {
             onMouseLeave={() => handleMouseLeave(4)}
             className="bento-card bento-card-3col"
           >
+            <div className="glow-overlay" />
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div>
                 <div className="bento-icon-box icon-box-amber">
