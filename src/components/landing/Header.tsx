@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Palette, Menu as MenuIcon, X, ArrowRight } from 'lucide-react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -23,11 +23,11 @@ const GithubIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 interface HeaderProps {
-  style: 'pill' | 'laser' | 'corner' | 'split-flap';
+  style: 'corner' | 'split-flap';
   onStartDrawing: () => void;
 }
 
-// Scramble text sub-component
+// Scramble text sub-component for premium motion typography
 function ScrambleText({ text, triggerScramble, isHovered }: { text: string; triggerScramble: boolean; isHovered: boolean }) {
   const [displayText, setDisplayText] = useState(text);
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*';
@@ -65,15 +65,6 @@ export default function Header({ style, onStartDrawing }: HeaderProps) {
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
 
-  // States for scroll pill behavior
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-
-  // SVG Refs for laser border style
-  const rectRef = useRef<SVGRectElement>(null);
-  const glowRef = useRef<SVGRectElement>(null);
-  const laserTweenRef = useRef<gsap.core.Tween | null>(null);
-
   const handleScrollTo = (id: string) => {
     setIsOpen(false);
     const element = document.getElementById(id);
@@ -86,207 +77,23 @@ export default function Header({ style, onStartDrawing }: HeaderProps) {
     setIsOverlayOpen(false);
     setTimeout(() => {
       handleScrollTo(id);
-    }, 450); // wait for menu overlay close animation
+    }, 450); // Wait for menu overlay slide-up animation
   };
 
-  // --- Pill Style Scroll Tracking ---
+  // --- Corner Dock Convergence Scroll Animation ---
   useEffect(() => {
-    if (style !== 'pill') {
-      setIsScrolled(false);
-      return;
-    }
-
-    const handleScroll = () => {
-      if (window.scrollY > 80) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // initial check
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [style]);
-
-  // --- Pill Style Animating/Morphing ---
-  useEffect(() => {
-    if (style !== 'pill') return;
-
-    const navbar = document.querySelector('.l-navbar');
-    const links = document.querySelectorAll('.l-nav-menu .l-nav-link');
-    const githubBtn = document.querySelector('.l-navbar .l-btn-github');
-    const brandName = document.querySelector('.l-navbar .l-brand-name');
-    const primaryBtn = document.querySelector('.l-navbar .l-btn-primary');
-
-    if (!navbar) return;
-
-    if (isScrolled && !isHovered) {
-      // Shrink into a pill
-      gsap.to(navbar, {
-        maxWidth: '480px',
-        borderRadius: '30px',
-        padding: '6px 12px',
-        background: 'rgba(10, 10, 12, 0.9)',
-        borderColor: 'rgba(255, 255, 255, 0.15)',
-        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.8)',
-        duration: 0.4,
-        ease: 'power3.out',
-      });
-      gsap.to(links, {
-        opacity: 0,
-        scale: 0.8,
-        display: 'none',
-        duration: 0.2,
-      });
-      if (githubBtn) {
-        gsap.to(githubBtn, {
-          opacity: 0,
-          display: 'none',
-          duration: 0.2,
-        });
-      }
-      if (brandName) {
-        gsap.to(brandName, {
-          fontSize: '16px',
-          duration: 0.3,
-        });
-      }
-      if (primaryBtn) {
-        gsap.to(primaryBtn, {
-          padding: '8px 16px',
-          fontSize: '12px',
-          duration: 0.4,
-        });
-      }
-    } else {
-      // Expand back out (scrolled + hovered, or not scrolled at all)
-      gsap.to(navbar, {
-        maxWidth: '1200px',
-        borderRadius: '9999px',
-        padding: '10px 24px',
-        background: isScrolled ? 'rgba(10, 10, 12, 0.9)' : 'rgba(0, 0, 0, 0.4)',
-        borderColor: isScrolled ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.08)',
-        boxShadow: isScrolled ? '0 12px 40px rgba(0, 0, 0, 0.7)' : '0 8px 32px rgba(0, 0, 0, 0.5)',
-        duration: 0.4,
-        ease: 'power3.out',
-      });
-      gsap.to(links, {
-        opacity: 1,
-        scale: 1,
-        display: 'inline-block',
-        duration: 0.3,
-        stagger: 0.02,
-        delay: 0.05,
-      });
-      if (githubBtn) {
-        gsap.to(githubBtn, {
-          opacity: 1,
-          display: 'flex',
-          duration: 0.3,
-          delay: 0.05,
-        });
-      }
-      if (brandName) {
-        gsap.to(brandName, {
-          fontSize: '20px',
-          duration: 0.3,
-        });
-      }
-      if (primaryBtn) {
-        gsap.to(primaryBtn, {
-          padding: '10px 24px',
-          fontSize: '14px',
-          duration: 0.4,
-        });
-      }
-    }
-  }, [isScrolled, isHovered, style]);
-
-  // --- Laser Style Path Tracing & Scroll Velocity ---
-  useEffect(() => {
-    if (style !== 'laser') return;
-
-    const updatePathLength = () => {
-      if (glowRef.current && rectRef.current) {
-        const length = glowRef.current.getTotalLength();
-        
-        // Setup initial stroke attributes
-        gsap.set([glowRef.current, rectRef.current], {
-          strokeDasharray: length,
-        });
-        gsap.set(glowRef.current, {
-          strokeDasharray: `110 ${length}`,
-          strokeDashoffset: 0,
-        });
-
-        // Terminate active tweens
-        if (laserTweenRef.current) {
-          laserTweenRef.current.kill();
-        }
-
-        // Loop the laser dot infinitely
-        laserTweenRef.current = gsap.to(glowRef.current, {
-          strokeDashoffset: -length,
-          duration: 4,
-          ease: 'none',
-          repeat: -1,
-        });
-      }
-    };
-
-    // Wait slightly for DOM to compute layout rect dimensions
-    const timer = setTimeout(updatePathLength, 50);
-    window.addEventListener('resize', updatePathLength);
-
-    // Track scroll speed to scale loop speed
-    let lastScrollY = window.scrollY;
-    let velocityTween: gsap.core.Tween | null = null;
-
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const velocity = Math.abs(currentScrollY - lastScrollY);
-      lastScrollY = currentScrollY;
-
-      if (laserTweenRef.current) {
-        const targetScale = gsap.utils.clamp(1, 4.5, 1 + velocity * 0.06);
-        
-        if (velocityTween) velocityTween.kill();
-        
-        velocityTween = gsap.to(laserTweenRef.current, {
-          timeScale: targetScale,
-          duration: 0.15,
-          overwrite: 'auto',
-          onComplete: () => {
-            gsap.to(laserTweenRef.current!, {
-              timeScale: 1,
-              duration: 0.6,
-              delay: 0.1,
-              overwrite: 'auto',
-            });
-          }
-        });
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', updatePathLength);
-      window.removeEventListener('scroll', handleScroll);
-      if (laserTweenRef.current) laserTweenRef.current.kill();
-      if (velocityTween) velocityTween.kill();
-    };
-  }, [style]);
-
-  // --- Corner Dock Convergence Animation ---
-  useEffect(() => {
-    // Reset standard layout inline styling initially
+    // Reset standard layout styling initially
     const mainNavbar = document.querySelector('.l-navbar');
     gsap.set(mainNavbar, { clearProps: 'all' });
 
     if (style !== 'corner') return;
+
+    // Check screen size
+    if (window.innerWidth < 768) {
+      // Standard mobile navbar layout, fully interactive
+      gsap.set(mainNavbar, { opacity: 1, y: 0, pointerEvents: 'auto' });
+      return;
+    }
 
     const logo = document.querySelector('.l-corner-logo');
     const github = document.querySelector('.l-corner-github');
@@ -295,11 +102,10 @@ export default function Header({ style, onStartDrawing }: HeaderProps) {
 
     if (!mainNavbar || !logo || !github || !nav || !cta) return;
 
-    // Initially hide center top header and show corner docks
+    // Initially hide center top header and show corner docks on desktop
     gsap.set(mainNavbar, { opacity: 0, y: -20, pointerEvents: 'none' });
     gsap.set([logo, github, nav, cta], { opacity: 1, scale: 1 });
 
-    // Scrub animations from corner positions merging into top center header
     const scrubTl = gsap.timeline({
       scrollTrigger: {
         trigger: 'body',
@@ -322,7 +128,7 @@ export default function Header({ style, onStartDrawing }: HeaderProps) {
     };
   }, [style]);
 
-  // --- Split-Flap Slide Down Animation ---
+  // --- Split-Flap Overlay Slide-Down Animation ---
   useEffect(() => {
     if (style !== 'split-flap') {
       setIsOverlayOpen(false);
@@ -330,7 +136,6 @@ export default function Header({ style, onStartDrawing }: HeaderProps) {
     }
 
     if (isOverlayOpen) {
-      // Prevent body scrolling when menu is full screen
       document.body.style.overflow = 'hidden';
 
       gsap.fromTo('.l-overlay-menu',
@@ -343,7 +148,6 @@ export default function Header({ style, onStartDrawing }: HeaderProps) {
         { y: 0, opacity: 1, duration: 0.5, stagger: 0.08, ease: 'power3.out', delay: 0.15 }
       );
     } else {
-      // Restore standard body scroll setting for landing
       document.body.style.overflow = 'auto';
 
       gsap.to('.l-overlay-menu', {
@@ -362,11 +166,7 @@ export default function Header({ style, onStartDrawing }: HeaderProps) {
   return (
     <>
       <header className="l-header">
-        <div
-          className="l-navbar"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
+        <div className="l-navbar">
           {/* Logo */}
           <div className="l-logo-container" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <div className="l-logo-box">
@@ -377,7 +177,7 @@ export default function Header({ style, onStartDrawing }: HeaderProps) {
             </span>
           </div>
 
-          {/* Desktop Nav - Hidden in split-flap / corner style at start */}
+          {/* Desktop Nav - Hidden in split-flap style */}
           {style !== 'split-flap' && (
             <nav className="l-nav-menu">
               <button onClick={() => handleScrollTo('features')} className="l-nav-link">
@@ -429,28 +229,8 @@ export default function Header({ style, onStartDrawing }: HeaderProps) {
             </button>
           )}
 
-          {/* SVG Laser Border */}
-          {style === 'laser' && (
-            <svg className="l-laser-svg">
-              <rect
-                ref={rectRef}
-                className="l-laser-path"
-                rx="9999"
-                width="100%"
-                height="100%"
-              />
-              <rect
-                ref={glowRef}
-                className="l-laser-glow"
-                rx="9999"
-                width="100%"
-                height="100%"
-              />
-            </svg>
-          )}
-
-          {/* Mobile menu trigger */}
-          {style !== 'split-flap' && style !== 'corner' && (
+          {/* Standard Mobile menu trigger (for corner style on mobile view) */}
+          {style !== 'split-flap' && (
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="l-navbar-menu-trigger"
@@ -461,7 +241,7 @@ export default function Header({ style, onStartDrawing }: HeaderProps) {
         </div>
 
         {/* Standard Mobile Drawer */}
-        {isOpen && style !== 'split-flap' && style !== 'corner' && (
+        {isOpen && style !== 'split-flap' && (
           <div className="l-mobile-drawer">
             <nav className="l-mobile-nav">
               <button
@@ -510,7 +290,7 @@ export default function Header({ style, onStartDrawing }: HeaderProps) {
         )}
       </header>
 
-      {/* --- Corner Docks Mode Widgets --- */}
+      {/* --- Corner Docks Mode Widgets (Hidden in mobile view via media-query) --- */}
       {style === 'corner' && (
         <>
           {/* Top-Left Logo Box */}

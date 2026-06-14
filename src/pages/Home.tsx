@@ -11,10 +11,10 @@ interface HomeProps {
   onStartDrawing: () => void;
 }
 
-type HeaderStyleType = 'pill' | 'laser' | 'corner' | 'split-flap';
+type HeaderStyleType = 'corner' | 'split-flap';
 
 export default function Home({ onStartDrawing }: HomeProps) {
-  const [headerStyle, setHeaderStyle] = useState<HeaderStyleType>('laser');
+  const [headerStyle, setHeaderStyle] = useState<HeaderStyleType>('split-flap');
 
   return (
     <div className="landing-body">
@@ -40,32 +40,22 @@ export default function Home({ onStartDrawing }: HomeProps) {
       <div className="l-switcher-container">
         <div className="l-switcher-title">
           <div className="l-switcher-title-dot" />
-          Header Animation Switcher
+          Header Style
         </div>
-        <div className="l-switcher-buttons">
+        <div className="l-switcher-buttons" style={{ gridTemplateColumns: '1fr' }}>
           <button
-            onClick={() => setHeaderStyle('laser')}
-            className={`l-switcher-btn ${headerStyle === 'laser' ? 'active' : ''}`}
+            onClick={() => setHeaderStyle('split-flap')}
+            className={`l-switcher-btn ${headerStyle === 'split-flap' ? 'active' : ''}`}
+            style={{ padding: '10px' }}
           >
-            Laser Trail
-          </button>
-          <button
-            onClick={() => setHeaderStyle('pill')}
-            className={`l-switcher-btn ${headerStyle === 'pill' ? 'active' : ''}`}
-          >
-            Scroll Pill
+            Split-Flap Scramble
           </button>
           <button
             onClick={() => setHeaderStyle('corner')}
             className={`l-switcher-btn ${headerStyle === 'corner' ? 'active' : ''}`}
+            style={{ padding: '10px' }}
           >
             Corner Docks
-          </button>
-          <button
-            onClick={() => setHeaderStyle('split-flap')}
-            className={`l-switcher-btn ${headerStyle === 'split-flap' ? 'active' : ''}`}
-          >
-            Split-Flap
           </button>
         </div>
       </div>

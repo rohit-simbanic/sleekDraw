@@ -1602,3 +1602,36 @@
   padding: 14px 32px;
   font-size: 15px;
 }
+
+/* --- Mobile Responsive Overrides for Interactive Headers --- */
+@media (max-width: 767px) {
+  /* Omit corner widgets on mobile screen widths */
+  .l-corner-widget {
+    display: none !important;
+  }
+  
+  /* Ensure top navbar is always visible and functional on mobile */
+  .l-navbar {
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+  }
+  
+  /* Shrink overlay link font size for split-flap menu on mobile */
+  .l-overlay-link-btn {
+    font-size: 32px;
+  }
+  
+  .l-overlay-action-container {
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
+    width: 80%;
+  }
+  
+  .l-overlay-action-container .l-btn-primary,
+  .l-overlay-action-container .l-btn-github {
+    width: 100%;
+    justify-content: center;
+  }
+}
