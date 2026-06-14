@@ -3,11 +3,11 @@ import '../landing.css';
 
 export default function NotFound() {
   const handleGoHome = () => {
-    window.location.hash = '';
+    window.location.href = window.location.origin + '/';
   };
 
   const handleCreateNew = () => {
-    window.location.hash = 'draw';
+    window.location.href = window.location.origin + '/#draw';
   };
 
   return (

@@ -31,7 +31,14 @@ export default function App() {
 
   // Simple Hash Router state
   const [currentView, setCurrentView] = useState<'landing' | 'canvas' | '404'>(() => {
+    const pathname = window.location.pathname;
     const hash = window.location.hash;
+
+    // If path is not root (e.g. /accc), show 404
+    if (pathname !== '/' && pathname !== '/index.html') {
+      return '404';
+    }
+
     if (!hash || hash === '#' || hash === '#/') {
       return 'landing';
     }
@@ -48,7 +55,14 @@ export default function App() {
 
   useEffect(() => {
     const handleHashChange = () => {
+      const pathname = window.location.pathname;
       const hash = window.location.hash;
+
+      if (pathname !== '/' && pathname !== '/index.html') {
+        setCurrentView('404');
+        return;
+      }
+
       if (!hash || hash === '#' || hash === '#/') {
         setCurrentView('landing');
       } else if (hash === '#draw' || hash.match(/#room=([a-zA-Z0-9_-]+)&key=([a-fA-F0-9]{32})/)) {
