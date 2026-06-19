@@ -4,6 +4,10 @@ import type { CanvasElement, AppState, PeerCursor } from '../types';
 import { generateEncryptionKey, encryptData, decryptData } from '../utils/crypto';
 import { BACKEND_URL } from '../constants';
 
+const isLightTheme = (color: string) => {
+  return color === '#ffffff' || color === '#f3f4f6';
+};
+
 interface UseCollaborationProps {
   setElements: React.Dispatch<React.SetStateAction<CanvasElement[]>>;
   appState: AppState;
@@ -86,10 +90,20 @@ export const useCollaboration = ({
           const decryptedAppStateStr = await decryptData(encryptionKeyRef.current, encryptedAppState);
           const parsedAppState = JSON.parse(decryptedAppStateStr);
           if (parsedAppState?.canvasBackgroundColor) {
-            setAppState(prev => ({
-              ...prev,
-              canvasBackgroundColor: parsedAppState.canvasBackgroundColor
-            }));
+            const light = isLightTheme(parsedAppState.canvasBackgroundColor);
+            setAppState(prev => {
+              let nextStroke = prev.strokeColor;
+              if (light && prev.strokeColor === '#ffffff') {
+                nextStroke = '#121212';
+              } else if (!light && prev.strokeColor === '#121212') {
+                nextStroke = '#ffffff';
+              }
+              return {
+                ...prev,
+                canvasBackgroundColor: parsedAppState.canvasBackgroundColor,
+                strokeColor: nextStroke
+              };
+            });
           }
         }
       } catch (err) {
@@ -112,10 +126,20 @@ export const useCollaboration = ({
           const decryptedAppStateStr = await decryptData(encryptionKeyRef.current, encryptedAppState);
           const parsedAppState = JSON.parse(decryptedAppStateStr);
           if (parsedAppState?.canvasBackgroundColor) {
-            setAppState(prev => ({
-              ...prev,
-              canvasBackgroundColor: parsedAppState.canvasBackgroundColor
-            }));
+            const light = isLightTheme(parsedAppState.canvasBackgroundColor);
+            setAppState(prev => {
+              let nextStroke = prev.strokeColor;
+              if (light && prev.strokeColor === '#ffffff') {
+                nextStroke = '#121212';
+              } else if (!light && prev.strokeColor === '#121212') {
+                nextStroke = '#ffffff';
+              }
+              return {
+                ...prev,
+                canvasBackgroundColor: parsedAppState.canvasBackgroundColor,
+                strokeColor: nextStroke
+              };
+            });
           }
         }
       } catch (err) {

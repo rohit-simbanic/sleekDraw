@@ -298,7 +298,7 @@ export default function App() {
     window.addEventListener('resize', handleResize);
     handleResize();
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [currentView]);
 
   // Connect to E2EE Room if URL hash matches on load
   useEffect(() => {
