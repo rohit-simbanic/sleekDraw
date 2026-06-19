@@ -26,6 +26,10 @@ import NotFound from './pages/NotFound';
 
 const myColor = PEER_COLORS[Math.floor(Math.random() * PEER_COLORS.length)];
 
+const isCollabUrl = () => {
+  return !!window.location.hash.match(/#room=([a-zA-Z0-9_-]+)&key=([a-fA-F0-9]{32})/);
+};
+
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -85,22 +89,73 @@ export default function App() {
   }, [currentView]);
 
   // Core Drawing States
-  const [elements, setElements] = useState<CanvasElement[]>([]);
-  const [appState, setAppState] = useState<AppState>({
-    activeTool: 'selection',
-    strokeColor: '#ffffff',
-    fillColor: 'transparent',
-    fillStyle: 'hachure',
-    strokeWidth: 2,
-    strokeStyle: 'solid',
-    opacity: 1,
-    zoom: 1,
-    pan: { x: 0, y: 0 },
-    selectedElementIds: {},
-    theme: 'dark',
-    collaborativeRoomId: null,
-    canvasBackgroundColor: '#0c0c0e'
+  const [elements, setElements] = useState<CanvasElement[]>(() => {
+    if (isCollabUrl()) return [];
+    try {
+      const saved = localStorage.getItem('sleekdraw-elements');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
+
+  const [appState, setAppState] = useState<AppState>(() => {
+    const defaultState: AppState = {
+      activeTool: 'selection',
+      strokeColor: '#ffffff',
+      fillColor: 'transparent',
+      fillStyle: 'hachure',
+      strokeWidth: 2,
+      strokeStyle: 'solid',
+      opacity: 1,
+      zoom: 1,
+      pan: { x: 0, y: 0 },
+      selectedElementIds: {},
+      theme: 'dark',
+      collaborativeRoomId: null,
+      canvasBackgroundColor: '#0c0c0e'
+    };
+
+    if (isCollabUrl()) return defaultState;
+
+    try {
+      const saved = localStorage.getItem('sleekdraw-appstate');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          ...defaultState,
+          ...parsed
+        };
+      }
+    } catch (e) {
+      console.error('Failed to parse appState from localStorage', e);
+    }
+    return defaultState;
+  });
+
+  useEffect(() => {
+    // If it's a collab URL or currently in a collaborative room, do not persist to solo localStorage
+    if (isCollabUrl() || appState.collaborativeRoomId) {
+      return;
+    }
+
+    const activeElements = elements.filter(e => !e.isDeleted);
+    localStorage.setItem('sleekdraw-elements', JSON.stringify(activeElements));
+
+    const stateToPersist = {
+      strokeColor: appState.strokeColor,
+      fillColor: appState.fillColor,
+      fillStyle: appState.fillStyle,
+      strokeWidth: appState.strokeWidth,
+      strokeStyle: appState.strokeStyle,
+      opacity: appState.opacity,
+      zoom: appState.zoom,
+      pan: appState.pan,
+      canvasBackgroundColor: appState.canvasBackgroundColor,
+      theme: appState.theme
+    };
+    localStorage.setItem('sleekdraw-appstate', JSON.stringify(stateToPersist));
+  }, [elements, appState]);
 
   // UI Toast stack states
   interface Toast {
